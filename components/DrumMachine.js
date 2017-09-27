@@ -48,7 +48,7 @@ const sounds = [
   'snare_drum.wav',
   'mid_tom.wav',
   'low_tom.wav',
-  'cowbell.wav',
+  'o_hi_hat.wav',
   'mid_conga.wav',
   'low_conga.wav',
   'bass_drum.wav'
