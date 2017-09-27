@@ -1,3 +1,4 @@
+import 'whatwg-fetch'
 import '../lib/hydrate'
 import React from 'react'
 import listen from 'simple-listen'
@@ -6,8 +7,40 @@ import Box from '../components/box'
 import theme from '../lib/theme'
 
 import { css } from 'react-emotion'
+const AudioContext = window.AudioContext || window.webkitAudioContext
+const audioCtx = new AudioContext()
 
-const audioCtx = new window.AudioContext()
+// adapted from https://paulbakaus.com/tutorials/html5/web-audio-on-ios/
+function enableIOSAudio () {
+  const buffer = audioCtx.createBuffer(1, 1, 22050)
+  const source = audioCtx.createBufferSource()
+
+  source.buffer = buffer
+  source.connect(audioCtx.destination)
+  source.noteOn(0)
+
+  window.removeEventListener('touchend', enableIOSAudio, false)
+}
+
+window.addEventListener('touchend', enableIOSAudio, false)
+
+function fileReaderReady (reader) {
+  return new Promise(function (resolve, reject) {
+    reader.onload = function () {
+      resolve(reader.result)
+    }
+    reader.onerror = function () {
+      reject(reader.error)
+    }
+  })
+}
+
+function readBlobAsArrayBuffer (blob) {
+  const reader = new window.FileReader()
+  const promise = fileReaderReady(reader)
+  reader.readAsArrayBuffer(blob)
+  return promise
+}
 
 // sounds originated from http://808.html909.com
 const sounds = [
@@ -42,11 +75,26 @@ export default class DrumMachine extends React.Component {
 
   async componentWillMount () {
     this.buffers = await Promise.all(
-      sounds.map(sound =>
-        window
-          .fetch(`/static/sounds/${sound}`)
-          .then(res => res.arrayBuffer())
-          .then(buffer => audioCtx.decodeAudioData(buffer))
+      sounds.map(
+        sound =>
+          new Promise((resolve, reject) => {
+            const req = new window.XMLHttpRequest()
+            req.open('GET', `/static/sounds/${sound}`, true)
+            req.responseType = 'arraybuffer'
+
+            req.onload = function () {
+              const data = req.response
+
+              audioCtx.decodeAudioData(
+                data,
+                buffer => {
+                  resolve(buffer)
+                },
+                err => reject(err)
+              )
+            }
+            req.send()
+          })
       )
     )
     this.hashListener = listen(window, 'hashchange', this.handleHashChange)
@@ -85,7 +133,7 @@ export default class DrumMachine extends React.Component {
             const source = audioCtx.createBufferSource()
             source.buffer = this.buffers[row]
             source.connect(audioCtx.destination)
-            source.start()
+            source.start(0)
           } catch (e) {
             console.error(e.message)
           }
@@ -146,9 +194,9 @@ export default class DrumMachine extends React.Component {
                 const hash = window.location.hash.substr(1).padEnd(8 * 16, '0')
 
                 window.location.hash =
-                  (hash.substr(0, i) +
+                  hash.substr(0, i) +
                   (hash.charAt(i) === '1' ? '0' : '1') +
-                  hash.substr(i + 1))
+                  hash.substr(i + 1)
               }}
             />
           )
