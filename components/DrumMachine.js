@@ -30,7 +30,10 @@ export default class DrumMachine extends React.Component {
 
   constructor (props) {
     super(props)
-    this.state = { loading: true, grid: new Array(8 * 16) }
+    this.state = {
+      loading: true,
+      grid: Array.from({ length: 8 * 16 }, () => false)
+    }
     this.buffers = []
     this.lastCol = COLUMNS - 1
     this.currentCol = 0
@@ -46,18 +49,28 @@ export default class DrumMachine extends React.Component {
           .then(buffer => audioCtx.decodeAudioData(buffer))
       )
     )
-
-    this.setState(
-      { loaded: true },
-      () => (this.currentFrame = window.requestAnimationFrame(this.loop))
-    )
+    this.hashListener = listen(window, 'hashchange', this.handleHashChange)
+    this.handleHashChange()
+    this.setState({ loaded: true }, () => {
+      this.currentFrame = window.requestAnimationFrame(this.loop)
+    })
   }
 
-  componentDidMount () {
-  }
+  componentDidMount () {}
 
   componentWillUnmount () {
     window.cancelAnimationFrame(this.currentFrame)
+  }
+
+  handleHashChange = () => {
+    let substr = window.location.hash.substr(1).padEnd(8 * 16, '0')
+    const outGrid = [...substr].map((flag, i) => {
+      return flag === '1'
+    })
+
+    console.log(outGrid)
+
+    this.setState({ grid: outGrid })
   }
 
   loop = () => {
@@ -130,11 +143,12 @@ export default class DrumMachine extends React.Component {
                       : theme.colors.grape[8]
               }}
               onClick={() => {
-                const nextGrid = this.state.grid.slice()
-                nextGrid[i] = !this.state.grid[i]
-                this.setState({
-                  grid: nextGrid
-                })
+                const hash = window.location.hash.substr(1).padEnd(8 * 16, '0')
+
+                window.location.hash =
+                  (hash.substr(0, i) +
+                  (hash.charAt(i) === '1' ? '0' : '1') +
+                  hash.substr(i + 1))
               }}
             />
           )
