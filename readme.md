@@ -1,7 +1,7 @@
 
 # Emotion Beats
 
-Example for emotion with [next](https://github.com/zeit/next.js) and [React](https://github.com/facebook/react)
+Example for [emotion](https://github.com/emotion-js/emotion) with [next](https://github.com/zeit/next.js) and [React](https://github.com/facebook/react)
 
 #### Installation
 ```bash
