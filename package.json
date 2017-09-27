@@ -1,0 +1,51 @@
+{
+  "name": "pivot",
+  "private": true,
+  "dependencies": {
+    "babel-plugin-emotion": "^8.0.2-7",
+    "data-driven-motion": "^0.0.11",
+    "emotion": "^8.0.2-9",
+    "emotion-server": "^8.0.2-9",
+    "next": "^3.0.6",
+    "open-color": "^1.5.1",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-emotion": "^8.0.2-9",
+    "simple-listen": "^1.1.2",
+    "styled-system": "^1.0.0-13"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "css-loader": "^0.28.5",
+    "json-server": "^0.12.0",
+    "postcss-loader": "^2.0.6",
+    "raw-loader": "^0.5.1",
+    "standard": "^10.0.3",
+    "style-loader": "^0.18.2"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "NODE_ENV=production next start",
+    "lint": "standard"
+  },
+  "eslintConfig": {
+    "extends": "standard",
+    "parser": "babel-eslint",
+    "rules": {
+      "jsx-quotes": [
+        "error",
+        "prefer-single"
+      ]
+    }
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "/dist/"
+    ]
+  },
+  "browserslist": [
+    "last 1 Chrome version"
+  ]
+}
